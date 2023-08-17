@@ -1,6 +1,12 @@
 import Image from "next/image";
 import { BsBell, BsBookmark, BsEnvelope, BsTwitter } from "react-icons/bs";
-import { BiHash, BiHomeCircle, BiMoney, BiUser } from "react-icons/bi";
+import {
+  BiHash,
+  BiHomeCircle,
+  BiImageAlt,
+  BiMoney,
+  BiUser,
+} from "react-icons/bi";
 import { SlOptions } from "react-icons/sl";
 import FeedCard from "@/components/FeedCard";
 import { CredentialResponse, GoogleLogin } from "@react-oauth/google";
@@ -11,10 +17,17 @@ import { graphqlClient } from "@/clients/api";
 import { verifyUserGoogleTokenQuery } from "@/graphql/query/user";
 import { useCurrentUser } from "@/hooks/user";
 import { useQueryClient } from "@tanstack/react-query";
+import { Tweet } from "@/gql/graphql";
+import { useCreateTweet, useGetAllTweets } from "@/hooks/tweet";
 
 export default function Home() {
   const queryclient = useQueryClient();
   const { user } = useCurrentUser();
+  const { tweets } = useGetAllTweets();
+  const [content, setContent] = useState("");
+  const [imageURL, setImageURL] = useState("");
+  const {mutate} =useCreateTweet()
+  
   const [profileUrl, setprofileUrl] = useState<any>("");
   useEffect(() => {
     setprofileUrl(user?.profileImageURL);
@@ -80,6 +93,27 @@ export default function Home() {
     },
     [queryclient]
   );
+
+  const handleSelectImage = useCallback(() => {
+    const input = document.createElement("input");
+    input.setAttribute("type", "file");
+    input.setAttribute("accept", "image/*");
+
+    // const handlerFn = handleInputChangeFile(input);
+
+    // input.addEventListener("change", handlerFn);
+
+    input.click();
+  }, []);
+  const handleCreateTweet = useCallback(async () => {
+    await mutate({
+      content,
+      imageURL,
+    });
+    setContent("");
+    setImageURL("");
+  }, [mutate, content, imageURL]);
+
   return (
     <div>
       <div className="grid grid-cols-12 h-screen w-screen px-18">
@@ -125,14 +159,57 @@ export default function Home() {
           )}
         </div>
         <div className="col-span-5 border-r-[1px] border-l-[1px] h-screen overflow-scroll no-scrollbar border-gray-600">
+          <div className="border border-r-0 border-l-0 border-b-0 border-gray-600 p-5 hover:bg-slate-900 transition-all cursor-pointer text-white">
+            <div className="grid grid-cols-12 gap-3">
+              <div className="col-span-1">
+                {user?.profileImageURL && (
+                  <Image
+                    className=" rounded-full"
+                    src={profileUrl}
+                    alt="user-image"
+                    height={50}
+                    width={50}
+                  />
+                )}
+              </div>
+              <div className="col-span-11">
+                <textarea
+                  value={content}
+                  onChange={(e) => setContent(e.target.value)}
+                  className="w-full bg-transparent text-lg px-3 border-b border-slate-700"
+                  placeholder="What's happening?"
+                  rows={3}
+                ></textarea>
+                {/* {imageURL && (
+                  <Image
+                    src={imageURL}
+                    alt="tweet-image"
+                    width={300}
+                    height={300}
+                  />
+                )} */}
+                <div className="mt-2 flex justify-between items-center">
+                  <BiImageAlt onClick={handleSelectImage} className="text-xl" />
+                  <button
+                    onClick={handleCreateTweet}
+                    className="bg-[#1d9bf0] font-semibold text-sm py-2 px-4 rounded-full"
+                  >
+                    Tweet
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+          {tweets?.map((tweet) =>
+          tweet ? <FeedCard key={tweet?.id} data={tweet as Tweet} /> : null
+        )}
+          {/* <FeedCard />
           <FeedCard />
           <FeedCard />
           <FeedCard />
           <FeedCard />
           <FeedCard />
-          <FeedCard />
-          <FeedCard />
-          <FeedCard />
+          <FeedCard /> */}
         </div>
         {!user && (
           <div className="col-span-3 p-5">
