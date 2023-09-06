@@ -11,6 +11,7 @@ import { getUserByIdQuery } from "@/graphql/query/user";
 import { useCallback, useMemo } from "react";
 // import { followUserMutation,unfollowUserMutation } from "@/graphql/mutations/user";
 import { useQueryClient } from "@tanstack/react-query";
+import { followUserMutation, unfollowUserMutation } from "@/graphql/mutations/user";
 
 interface ServerProps {
   userInfo?: User;
@@ -18,32 +19,32 @@ interface ServerProps {
 
 const UserProfilePage: NextPage<ServerProps> = (props) => {
   const router = useRouter();
-console.log(props.userInfo)
   const queryClient = useQueryClient();
+  const { user: currentUser } = useCurrentUser();
 
-  // const amIFollowing = useMemo(() => {
-  //   if (!props.userInfo) return false;
-  //   return (
-  //     (currentUser?.following?.findIndex(
-  //       (el:any) => el?.id === props.userInfo?.id
-  //     ) ?? -1) >= 0
-  //   );
-  // }, [currentUser?.following, props.userInfo]);
+  const amIFollowing = useMemo(() => {
+    if (!props.userInfo) return false;
+    return (
+      (currentUser?.following?.findIndex(
+        (el:any) => el?.id === props.userInfo?.id
+      ) ?? -1) >= 0
+    );
+  }, [currentUser?.following, props.userInfo]);
 
-  // const handleFollowUser = useCallback(async () => {
-  //   if (!props.userInfo?.id) return;
-  //   await graphqlClient.request(followUserMutation, { to: props.userInfo?.id });
-  //   await queryClient.invalidateQueries(["curent-user"]);
-  // }, [props.userInfo?.id, queryClient]);
+  const handleFollowUser = useCallback(async () => {
+    if (!props.userInfo?.id) return;
+    await graphqlClient.request(followUserMutation, { to: props.userInfo?.id });
+    await queryClient.invalidateQueries(["curent-user"]);
+  }, [props.userInfo?.id, queryClient]);
 
-  // const handleUnfollowUser = useCallback(async () => {
-  //   if (!props.userInfo?.id) return;
+  const handleUnfollowUser = useCallback(async () => {
+    if (!props.userInfo?.id) return;
 
-  //   await graphqlClient.request(unfollowUserMutation, {
-  //     to: props.userInfo?.id,
-  //   });
-  //   await queryClient.invalidateQueries(["curent-user"]);
-  // }, [props.userInfo?.id, queryClient]);
+    await graphqlClient.request(unfollowUserMutation, {
+      to: props.userInfo?.id,
+    });
+    await queryClient.invalidateQueries(["curent-user"]);
+  }, [props.userInfo?.id, queryClient]);
 
   return (
     <div>
@@ -75,10 +76,10 @@ console.log(props.userInfo)
             </h3>
             <div className="flex justify-between items-center">
               <div className="flex gap-4 mt-2 text-sm text-gray-400">
-                {/* <span>{props.userInfo?.followers?.length} followers</span>
-                <span>{props.userInfo?.following?.length} following</span> */}
+                  <span>{props.userInfo?.followers?.length} followers</span> 
+                <span>{props.userInfo?.following?.length} following</span> 
               </div>
-              {/* {currentUser?.id !== props.userInfo?.id && (
+              {currentUser?.id !== props.userInfo?.id && (
                 <>
                   {amIFollowing ? (
                     <button
@@ -96,7 +97,7 @@ console.log(props.userInfo)
                     </button>
                   )}
                 </>
-              )} */}
+              )}
             </div>
           </div>
           <div>
