@@ -1,5 +1,7 @@
 # Tech Stack
 
+- **HOST_URL** https://twitter-client-lyart.vercel.app/
+
 - **Node.js** for our backend code which would be running graphql server inside node.js environment.
 - **GraphQL** for our API, which provides a flexible and efficient way to define our data model and query it.
 - **Prisma ORM** for our database ORM, which provides a type-safe and easy-to-use interface for interacting with our PostgreSQL database.
