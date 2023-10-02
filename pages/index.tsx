@@ -79,6 +79,8 @@ export default function Home() {
     setImageURL("");
   }, [mutate, content, imageURL]);
 
+  
+
   return (
     <div>
       <Twitterlayout>
@@ -125,15 +127,9 @@ export default function Home() {
             </div>
           </div>
           {tweets?.map((tweet) =>
-            tweet ? <FeedCard key={tweet?.id} data={tweet as Tweet} /> : null
+            tweet ? <FeedCard key={tweet?.id} data={tweet as Tweet} delBtn={false} /> : null
           )}
-          {/* <FeedCard />
-          <FeedCard />
-          <FeedCard />
-          <FeedCard />
-          <FeedCard />
-          <FeedCard />
-          <FeedCard /> */}
+         
         </div>
       </Twitterlayout>
     </div>

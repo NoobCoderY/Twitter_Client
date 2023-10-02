@@ -36,6 +36,7 @@ export const getCurrentUserQuery = graphql(`
       tweets {
         id
         content
+        imageURL
         author {
           id
           firstName
@@ -46,6 +47,7 @@ export const getCurrentUserQuery = graphql(`
     }
   }
 `);
+
 export const getUserByIdQuery = graphql(`
   #graphql
   query GetuserById($id: ID!) {
@@ -69,6 +71,7 @@ export const getUserByIdQuery = graphql(`
       tweets {
         content
         id
+        imageURL
         author {
           id
           firstName

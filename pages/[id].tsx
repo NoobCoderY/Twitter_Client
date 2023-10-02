@@ -11,7 +11,12 @@ import { getUserByIdQuery } from "@/graphql/query/user";
 import { useCallback, useMemo } from "react";
 // import { followUserMutation,unfollowUserMutation } from "@/graphql/mutations/user";
 import { useQueryClient } from "@tanstack/react-query";
-import { followUserMutation, unfollowUserMutation } from "@/graphql/mutations/user";
+import {
+  followUserMutation,
+  unfollowUserMutation,
+} from "@/graphql/mutations/user";
+import { deleteTweetMutation } from "@/graphql/mutations/tweet";
+import toast from "react-hot-toast";
 
 interface ServerProps {
   userInfo?: User;
@@ -22,11 +27,17 @@ const UserProfilePage: NextPage<ServerProps> = (props) => {
   const queryClient = useQueryClient();
   const { user: currentUser } = useCurrentUser();
 
+  // Call this function whenever you want to
+  // refresh props!
+  const refreshData = () => {
+    router.replace(router.asPath);
+  };
+
   const amIFollowing = useMemo(() => {
     if (!props.userInfo) return false;
     return (
       (currentUser?.following?.findIndex(
-        (el:any) => el?.id === props.userInfo?.id
+        (el: any) => el?.id === props.userInfo?.id
       ) ?? -1) >= 0
     );
   }, [currentUser?.following, props.userInfo]);
@@ -45,6 +56,24 @@ const UserProfilePage: NextPage<ServerProps> = (props) => {
     });
     await queryClient.invalidateQueries(["curent-user"]);
   }, [props.userInfo?.id, queryClient]);
+
+  const handleDeleteTweet = useCallback(
+    async (tweetId: string) => {
+      try {
+        await graphqlClient
+          .request(deleteTweetMutation, { deleteTweetId: tweetId })
+          .then((message: any) => {
+            toast.success(message?.deleteTweet);
+          });
+        await queryClient.invalidateQueries(["curent-user"]);
+        await queryClient.invalidateQueries(["all-tweets"]);
+        refreshData();
+      } catch (error: any) {
+        toast.error(error.response.errors[0].message);
+      }
+    },
+    []
+  );
 
   return (
     <div>
@@ -76,8 +105,8 @@ const UserProfilePage: NextPage<ServerProps> = (props) => {
             </h3>
             <div className="flex justify-between items-center">
               <div className="flex gap-4 mt-2 text-sm text-gray-400">
-                  <span>{props.userInfo?.followers?.length} followers</span> 
-                <span>{props.userInfo?.following?.length} following</span> 
+                <span>{props.userInfo?.followers?.length} followers</span>
+                <span>{props.userInfo?.following?.length} following</span>
               </div>
               {currentUser?.id !== props.userInfo?.id && (
                 <>
@@ -102,7 +131,12 @@ const UserProfilePage: NextPage<ServerProps> = (props) => {
           </div>
           <div>
             {props.userInfo?.tweets?.map((tweet) => (
-              <FeedCard data={tweet as Tweet} key={tweet?.id} />
+              <FeedCard
+                data={tweet as Tweet}
+                key={tweet?.id}
+                delBtn={true}
+                handleDeleteTweet={handleDeleteTweet}
+              />
             ))}
           </div>
         </div>

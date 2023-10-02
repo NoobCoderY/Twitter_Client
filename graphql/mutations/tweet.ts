@@ -8,3 +8,10 @@ export const createTweetMutation = graphql(`
     }
   }
 `);
+
+export const deleteTweetMutation = graphql(`
+  #graphql
+  mutation deleteTweet($deleteTweetId: ID!) {
+    deleteTweet(id: $deleteTweetId)
+  }
+`);
